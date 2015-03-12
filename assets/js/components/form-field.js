@@ -18,15 +18,15 @@ var FormField = React.createClass({
     var required = this.props.required;
 
     return (
-	     <tr>
+      <tr>
         <td>
           <label>{required ? <span style={style}>*</span> : null}{this.props.label}</label>
         </td>
-	      <td>
+        <td>
           {this.props.children}
           {error ? <span style={style}>{error}</span> : null}
         </td>
-	     </tr>
+      </tr>
     );
   }
 });
