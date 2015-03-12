@@ -15,7 +15,7 @@ var appStore = module.exports = Store({
 
 
 /////////////validator///////////////
-validator = Validator(appStore, {
+var validator = Validator(appStore, {
   username: {
     required: true,
     message: {
