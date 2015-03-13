@@ -81,3 +81,8 @@ iflux-validator
  validator.fieldErrors();
 
 ```
+
+
+webpack-dev-server --port 3000 -w
+http://localhost:3000/bundle
+

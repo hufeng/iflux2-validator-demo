@@ -1,7 +1,7 @@
 var React = require('react');
 
-var StoreMix = require('iflux/mixins/store-mixin');
-var msg = require('iflux/msg');
+var {msg} = require('iflux');
+var StoreMixin = require('iflux').mixins.StoreMixin;
 var appStore = require('./store');
 var Form = require('./components/form');
 var FormField = require('./components/form-field');
@@ -12,7 +12,7 @@ var ButtonField = require('./components/button-field');
  * app
  */
 var App = React.createClass({
-  mixins: [StoreMix(appStore)],
+  mixins: [StoreMixin(appStore)],
 
 
   /**

@@ -1,6 +1,4 @@
-var Store = require('iflux/store');
-var Validator = require('iflux/validator');
-var msg = require('iflux/msg');
+var {Store, msg, Validator} = require('iflux');
 
 
 ///////////////Store//////////////////
