@@ -2,7 +2,7 @@ var {Store, msg, Validator} = require('iflux');
 
 
 ///////////////Store//////////////////
-var appStore = module.exports = Store({
+appStore = module.exports = Store({
   username: '',
   password: '',
   confirm: '',
