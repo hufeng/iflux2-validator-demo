@@ -15,9 +15,11 @@ appStore = module.exports = Store({
 /////////////validator///////////////
 var validator = Validator(appStore, {
   username: {
-    required: true,
+   required: true,
+   maxLength: 10,
     message: {
-      required: 'username is required'
+      required: 'username is required',
+      maxLength: 'username max length is 10'
     }
   },
   password: {
@@ -35,7 +37,7 @@ var validator = Validator(appStore, {
     }
   },
   email: {
-    required: true,
+   required: true,
     email: true,
     message: {
       required: 'email is required.',
@@ -43,7 +45,7 @@ var validator = Validator(appStore, {
     }
   },
   qq: {
-    required: true,
+   required: true,
     qq: true,
     message: {
       required: 'qq is required.',
@@ -55,7 +57,6 @@ var validator = Validator(appStore, {
 //在调用isValid之前可以动态的添加自定义规则，for example
 //equal is rule name, callback is rule method.
 validator.rule('equal', function(param, val) {
-  console.log(param, val);
   return appStore.data().get(param) === val;
 })
 

@@ -55,10 +55,10 @@
 
 
 	/**
-	 * app
+	x * app
 	 */
 	var App = React.createClass({displayName: "App",
-	  mixins: [StoreMix(appStore)],
+	  mixins: [StoreMixin(appStore)],
 
 
 	  /**
@@ -79,7 +79,11 @@
 	      React.createElement(Form, {title: 'user register'}, 
 	        /* username */
 	        React.createElement(FormField, {error: userNameError, label: "username:", required: true}, 
-	          React.createElement("input", {type: "text", name: "username", value: store.get('username'), onChange: this._handleChange, onBlur: this._validateUserName})
+	          React.createElement("input", {
+	            type: "text", 
+	            name: "username", value: store.get('username'), 
+	            onChange: this._handleChange, 
+	            onBlur: this._validateUserName})
 	        ), 
 
 	        /* password */
@@ -100,6 +104,15 @@
 	       /* qq */
 	       React.createElement(FormField, {error: qqError, label: 'qq:', required: true}, 
 	        React.createElement("input", {type: "text", name: "qq", value: store.get('qq'), onChange: this._handleChange})
+	       ), 
+
+	       React.createElement("tr", null, 
+	         React.createElement("td", null, 
+	           React.createElement("select", {defaultValue: "1"}, 
+	             React.createElement("option", null, "please choose"), 
+	             React.createElement("option", {value: "1"}, "tet")
+	           )
+	         )
 	       ), 
 
 	       React.createElement(ButtonField, null, 
@@ -156,7 +169,7 @@
 
 
 	///////////////Store//////////////////
-	var appStore = module.exports = Store({
+	appStore = module.exports = Store({
 	  username: '',
 	  password: '',
 	  confirm: '',
@@ -169,9 +182,11 @@
 	/////////////validator///////////////
 	var validator = Validator(appStore, {
 	  username: {
-	    required: true,
+	   required: true,
+	   maxLength: 10,
 	    message: {
-	      required: 'username is required'
+	      required: 'username is required',
+	      maxLength: 'username max length is 10'
 	    }
 	  },
 	  password: {
@@ -189,7 +204,7 @@
 	    }
 	  },
 	  email: {
-	    required: true,
+	   required: true,
 	    email: true,
 	    message: {
 	      required: 'email is required.',
@@ -197,7 +212,7 @@
 	    }
 	  },
 	  qq: {
-	    required: true,
+	   required: true,
 	    qq: true,
 	    message: {
 	      required: 'qq is required.',
@@ -209,7 +224,6 @@
 	//在调用isValid之前可以动态的添加自定义规则，for example
 	//equal is rule name, callback is rule method.
 	validator.rule('equal', function(param, val) {
-	  console.log(param, val);
 	  return appStore.data().get(param) === val;
 	})
 
@@ -374,66 +388,82 @@
 	 * immutable使我们对于变化的跟踪变得更简单，且不变的数据共享
 	 * 又兼顾性能。
 	 */
-	module.exports = function Store(/*Immutable.Map*/arg) {
-	  /**
-	   * 当前应用的数据
-	   */
-	  var state = Immutable.fromJS(arg || {});
+	module.exports = Store;
 
-	  /**
-	   * 注册store change的callback
-	   */
-	  var callbacks = [];
+	/**
+	 * 数据中心
+	 *
+	 * @param obj
+	 */
+	function Store(data) {
+	  if (!(this instanceof Store)) return new Store(data);
 
+	  //当前应用的数据
+	  this.data = Immutable.fromJS(data || {});
 
-	  /**
-	   * 应用的数据
-	   */
-	  var data = function() {
-	    return state;
-	  };
-
-
-	  /**
-	   * 注册监听
-	   */
-	  var onStoreChange = function(callback) {
-	    callbacks.push(callback);
-	  };
-
-
-	  /**
-	   * 获取应用的cursor
-	   */
-	  var cursor = function() {
-	    var change = function (nextState, preState, path) {
-	      var nextData = nextState[_.isArray(path) ? 'getIn' : 'get'](path);
-	      _.log('cursor path: [', path.join(), '] store: ',
-	        (typeof(nextData) !== 'undefined') ? nextData.toString() : 'was deleted.');
-
-	      if (preState != state) {
-	        throw new Error('attempted to altere expired data.');
-	      }
-
-	      state = nextState;
-
-	      callbacks.forEach(function (callback) {
-	        callback(nextState, path);
-	      });
-	    };
-
-	    return Cursor.from(state, change);
-	  };
+	  //注册store change的callback
+	  this.callbacks = [];
 
 	  /**
 	   * 暴露给外面的方法
 	   */
 	  return {
-	    data: data,
-	    onStoreChange: onStoreChange,
-	    cursor: cursor
+	    data: this.getData.bind(this),
+	    onStoreChange: this.onStoreChange.bind(this),
+	    cursor: this.cursor.bind(this)
 	  };
 	};
+
+
+	/**
+	 * 获取数据
+	 */
+	 Store.prototype.getData = function() {
+	   return this.data;
+	 };
+
+
+	/**
+	 * 获取store中的cursor
+	 */
+	Store.prototype.cursor = function() {
+	  /**
+	   * cursor发生变化的回调
+	   *
+	   * @param nextState 变化后的状态
+	   * @param preState 变化前状态
+	   * @param path cursor变化的路径
+	   */
+	   var change = function (nextState, preState, path) {
+	     var nextData = nextState[_.isArray(path) ? 'getIn' : 'get'](path);
+
+	     _.log(
+	       'cursor path: [', path.join(), '] store: ',
+	        (typeof(nextData) !== 'undefined' && nextData != null) ? nextData.toString() : 'was deleted.'
+	      );
+
+	      //判断是否出现数据不同步的情况
+	      if (preState != this.data) {
+	        throw new Error('attempted to altere expired data.');
+	      }
+
+	      this.data = nextState;
+
+	      this.callbacks.forEach(function (callback) {
+	        callback(nextState, path);
+	      });
+	    }.bind(this);
+
+	    return Cursor.from(this.data, change);
+	 };
+
+
+	/**
+	 * 绑定Store数据变化的回调
+	 */
+	 Store.prototype.onStoreChange = function(callback) {
+	   this.callbacks.push(callback);
+	 };
 
 
 /***/ },
@@ -462,7 +492,7 @@
 	 * 4. 集成iflux的store
 	 *
 	 * Usage：
-	 * 
+	 *
 	 * var iflux = require('iflux');
 	 *
 	 * var store = iflux.Store({
@@ -496,7 +526,7 @@
 	 *	email: true,
 	 *	message: {
 	 *	  required: 'email is required',
-	 *	  email: 'email is invalid.'	
+	 *	  email: 'email is invalid.'
 	 *	}
 	 *   }
 	 * });
@@ -515,24 +545,7 @@
 	 *
 	 * @type {Function}
 	 */
-	module.exports = function (store, rules, opts) {
-	  if (!store || !rules) {
-	    throw new Error('store or rules can not empty!');
-	  }
-
-	  var validator = new Validator(store, rules);
-
-	  /**
-	   * 最小化暴露方法
-	   */
-	  return {
-	    isValid: validator.isValid.bind(validator),
-	    rule: validator.rule.bind(validator),
-	    fieldErrors: function () {
-	      return this.fieldErrors.toJS();
-	    }.bind(validator)
-	  }
-	};
+	module.exports = Validator;
 
 
 	/**
@@ -544,10 +557,28 @@
 	 * @constructor
 	 */
 	function Validator(store, rules, opts) {
+	  if (!(this instanceof Validator)) return new Validator(store, rules, opts);
+
+	  //校验参数
+	  if (!store || !rules) {
+	    throw new Error('store or rules can not empty!');
+	  }
+
 	  this.store = store;
 	  this.rules = rules;
-	  this.fieldErrors = Immutable.fromJS({});
-	  this.opts = opts;
+	  this.opts = opts || {};
+	  this.fieldErrors = Immutable.OrderedMap({});
+
+	  /**
+	   * 最小化暴露方法
+	   */
+	  return {
+	    isValid: this.isValid.bind(this),
+	    rule: this.rule.bind(this),
+	    fieldErrors: function () {
+	      return this.fieldErrors.toJS();
+	    }.bind(this)
+	  }
 	}
 
 
@@ -568,11 +599,12 @@
 	 * @param path
 	 */
 	Validator.prototype.isValid = function (path) {
+	  var success = true;
+
 	  var _this = this;
 	  var store = this.store;
 	  var rules = this.rules;
-	  var success = true;
-	  var opts = this.opts || {};
+	  var opts = this.opts;
 
 	  var oneError = opts['oneError'];
 	  oneError = (oneError !== false);
@@ -585,25 +617,48 @@
 
 	    //获取path对应的值
 	    var pathArr = path.split("\.");
-	    var val = store.data()[_.isArray(pathArr) ? 'getIn' : 'get'](pathArr);
+	    //值默认为空字符串
+	    var val = store.data()[_.isArray(pathArr) ? 'getIn' : 'get'](pathArr) || '';
 
 	    //遍历所有的规则名称，执行校验方法
 	    var ruleNameList = _.keys(ruleObj).filter(function (ruleName) {
 	      return ruleName !== 'message';
 	    });
 
+	    //校验规则中是否包含必填项，如果没有必填项，当值为空时不校验
+	    var isRequired = ruleNameList.indexOf('required') != -1;
+
 	    for (var i = 0, len = ruleNameList.length; i < len; i++) {
 	      var ruleName = ruleNameList[i];
 	      //校验规则对应的值
 	      var ruleValue = ruleObj[ruleName];
+
+	      //log it
+	      _.log(
+	        '\npath:', path,
+	        'ruleName:', ruleName,
+	        'ruleValue:', ruleValue,
+	        'val:', val
+	      );
+
+	      //如果不是必填项，当值为空字时，不校验
+	      if (ruleName !== 'required' && !isRequired && val === '') {
+	        continue;
+	      }
+
+	      if (typeof(_this[ruleName]) === 'undefined') {
+	        throw new Error(path + ':' + ruleName + ' can not find.');
+	      }
+
 	      //校验结果
 	      var result = _this[ruleName](ruleValue, val);
+
 	      //校验没有通过
 	      if (!result) {
 	        success = false;
 	        var validMsg = (ruleObj['message'] || {})[ruleName];
 	        if (!validMsg) {
-	          _.log(path, ' rule: ', ruleName, 'not any message info!');
+	          _.log('Warning:', path, ' rule: ', ruleName, 'not any message info!');
 	        }
 	        _.isArray(messageInfo) ?  messageInfo.push(validMsg || '') : (messageInfo = validMsg || '');
 
@@ -613,7 +668,7 @@
 	        }
 	      }
 	    }
-	    if (messageInfo.length > 0) {
+	    if (messageInfo.length) {
 	      _this.fieldErrors = _this.fieldErrors[_.isArray(pathArr) ? 'setIn' : 'set'](pathArr, Immutable.fromJS(messageInfo));
 	    } else {
 	      _this.fieldErrors = _this.fieldErrors[_.isArray(pathArr) ? 'deleteIn' : 'delete'](pathArr);
@@ -636,7 +691,7 @@
 	  }
 
 	  //如果校验没有通过，设置store的fieldErrors
-	  store.cursor().set('fieldErrors', _this.fieldErrors);
+	  store.cursor().set('fieldErrors', this.fieldErrors);
 
 	  return success;
 	};
@@ -994,7 +1049,7 @@
 	 * 主要想简单的使用node EventEmitter模块，其实略感这个模块有点大，其实很可以简化。
 	 * 做到一个minievent。
 	 */
-	var msg = module.exports = new EventEmitter();
+	module.exports = new EventEmitter();
 
 
 /***/ },
@@ -1023,7 +1078,9 @@
 	    componentDidMount: function() {
 	      var _this = this;
 	      store.onStoreChange(function(nextState, path) {
-	        _this.replaceState(nextState);
+	        if (_this.isMounted()) {
+	          _this.replaceState(nextState);
+	        }
 	      });
 	    }
 	  };
@@ -25057,7 +25114,7 @@
 
 	"use strict";
 
-	var camelize = __webpack_require__(163);
+	var camelize = __webpack_require__(162);
 
 	var msPattern = /^-ms-/;
 
@@ -25165,7 +25222,7 @@
 
 	"use strict";
 
-	var hyphenate = __webpack_require__(162);
+	var hyphenate = __webpack_require__(163);
 
 	var msPattern = /^ms-/;
 
@@ -26232,6 +26289,42 @@
 	 * LICENSE file in the root directory of this source tree. An additional grant
 	 * of patent rights can be found in the PATENTS file in the same directory.
 	 *
+	 * @providesModule camelize
+	 * @typechecks
+	 */
+
+	var _hyphenPattern = /-(.)/g;
+
+	/**
+	 * Camelcases a hyphenated string, for example:
+	 *
+	 *   > camelize('background-color')
+	 *   < "backgroundColor"
+	 *
+	 * @param {string} string
+	 * @return {string}
+	 */
+	function camelize(string) {
+	  return string.replace(_hyphenPattern, function(_, character) {
+	    return character.toUpperCase();
+	  });
+	}
+
+	module.exports = camelize;
+
+
+/***/ },
+/* 163 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Copyright 2013-2015, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
 	 * @providesModule hyphenate
 	 * @typechecks
 	 */
@@ -26255,42 +26348,6 @@
 	}
 
 	module.exports = hyphenate;
-
-
-/***/ },
-/* 163 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Copyright 2013-2015, Facebook, Inc.
-	 * All rights reserved.
-	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
-	 *
-	 * @providesModule camelize
-	 * @typechecks
-	 */
-
-	var _hyphenPattern = /-(.)/g;
-
-	/**
-	 * Camelcases a hyphenated string, for example:
-	 *
-	 *   > camelize('background-color')
-	 *   < "backgroundColor"
-	 *
-	 * @param {string} string
-	 * @return {string}
-	 */
-	function camelize(string) {
-	  return string.replace(_hyphenPattern, function(_, character) {
-	    return character.toUpperCase();
-	  });
-	}
-
-	module.exports = camelize;
 
 
 /***/ },

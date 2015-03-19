@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "iflux": "^1.0.2",
+    "iflux": "^1.0.5",
     "immutable": "^3.6.4",
     "react": "^0.13.0"
   },

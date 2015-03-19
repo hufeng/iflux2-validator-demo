@@ -9,7 +9,7 @@ var ButtonField = require('./components/button-field');
 
 
 /**
- * app
+x * app
  */
 var App = React.createClass({
   mixins: [StoreMixin(appStore)],
@@ -33,7 +33,11 @@ var App = React.createClass({
       <Form title={'user register'}>
         {/* username */}
         <FormField error={userNameError} label="username:" required={true}>
-          <input type="text" name="username" value={store.get('username')} onChange={this._handleChange} onBlur={this._validateUserName}/>
+          <input
+            type="text"
+            name="username" value={store.get('username')}
+            onChange={this._handleChange}
+            onBlur={this._validateUserName}/>
         </FormField>
 
         {/* password */}
