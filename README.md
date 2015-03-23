@@ -83,6 +83,6 @@ iflux-validator
 ```
 
 
-webpack-dev-server --port 3000 -w
+npm start
 http://localhost:3000/bundle
 

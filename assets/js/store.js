@@ -84,3 +84,11 @@ msg.on('login', function() {
     console.log('yes! submit success');
   }
 });
+
+
+/**
+ * reset form data
+ */
+msg.on('reset', function() {
+  appStore.reset();
+});

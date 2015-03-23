@@ -4,12 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "webpack -w --color --process --config webpack.config.js"
+    "start": "webpack-dev-server --port 3000 --watch"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "iflux": "^1.0.5",
+    "iflux": "^1.0.7",
     "immutable": "^3.6.4",
     "react": "^0.13.0"
   },

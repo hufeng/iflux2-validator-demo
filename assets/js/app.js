@@ -62,6 +62,7 @@ var App = React.createClass({
 
        <ButtonField>
         <input type="submit" value="login" onClick={this._handleLogin}/>
+        <input type="button" value="reset" onClick={this._handleReset}/>
        </ButtonField>
       </Form>
     );
@@ -96,6 +97,14 @@ var App = React.createClass({
   _handleLogin(e) {
     e.preventDefault();
     msg.emit('login');
+  },
+
+
+  /**
+   * reset
+   */
+  _handleReset() {
+    msg.emit('reset');
   }
 });
 
