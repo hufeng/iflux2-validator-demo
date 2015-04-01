@@ -1,15 +1,11 @@
 var {Store, msg, Validator} = require('iflux');
-
+var Form = require('./record/form');
+var form = new Form();
 
 ///////////////Store//////////////////
-appStore = module.exports = Store({
-  username: '',
-  password: '',
-  confirm: '',
-  email: '',
-  qq: ''
-});
-
+var appStore = module.exports = Store(
+  form
+);
 
 
 /////////////validator///////////////
@@ -90,5 +86,5 @@ msg.on('login', function() {
  * reset form data
  */
 msg.on('reset', function() {
-  appStore.reset();
+  appStore.cursor().clear();
 });
