@@ -1,12 +1,25 @@
+var HtmlWebpackPlugin = require('html-webpack-plugin')
+
 module.exports = {
-  entry: './assets/js/app.js',
+  devtool: 'cheap-module-eval-source-map',
+
+  entry: {
+    index: './src/index.js'
+  },
   output: {
     path: './build',
-    filename: 'bundle.js'
+    filename: 'bundle-[name].js'
   },
   module: {
     loaders: [
-      {test: /\.js$/, loader: 'jsx-loader?harmony'}
+      {test: /\.js/, exclude: /node_modules/, loader: 'babel-loader?cacheDirectory'},
+      {test: /\.css$/, loader: "style-loader!css-loader" }
     ]
-  }
+  },
+  plugins: [
+     new HtmlWebpackPlugin({
+      filename: 'index.html',
+      template: './index.html'
+    })
+  ]
 };
