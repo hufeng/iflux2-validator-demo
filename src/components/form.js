@@ -14,7 +14,8 @@ export default class Form extends Component {
     email: '',
     qq: '',
     validator: validatorQL,
-    changeValue: noop
+    changeValue: noop,
+    validateField: noop
   };
 
   render() {
@@ -24,14 +25,18 @@ export default class Form extends Component {
       confirm,
       email,
       qq,
-      changeValue
+      changeValue,
+      validateField
     } = this.props;
 
     return (
       <fieldset>
         <legend>{'user profile'}</legend>
         <form
-          onChange={e => changeValue(e.target.name, e.target.value)}>
+          onSubmit={e => {e.preventDefault(); validateField('all')}}
+          onChange={e => changeValue(e.target.name, e.target.value)}
+          onBlur={e => validateField(e.target.name)}
+        >
           <table>
             <tbody>
             {/* username */}

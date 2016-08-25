@@ -1,18 +1,17 @@
 import { QL, Validator } from 'iflux2'
 
 export const validatorQL = QL('validatorQL', [
-  'isFirstLoading',
+  'fields',
   'username',
   'password',
   'confirm',
   'email',
   'qq',
-  (isFirstLoading, username, password, confirm, email, qq) => {
-    // if (isFirstLoading) {
-    //   return {
-    //     errors: {}
-    //   }
-    // }
+  (fields, username, password, confirm, email, qq) => {
+    //初始状态不校验
+    if (fields.isEmpty()) {
+      return {errors: {}}
+    }
 
     const form = {
       username,
@@ -59,14 +58,14 @@ export const validatorQL = QL('validatorQL', [
         }
       },
       qq: {
-       required: true,
+        required: true,
         qq: true,
         message: {
           required: 'qq is required.',
           qq: 'qq is invalid.'
         }
       }
-    }, {debug: true, oneError: false});
+    }, {debug: true, validateFields: fields.toArray()});
 
     return result;
   }
