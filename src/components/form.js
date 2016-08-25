@@ -15,7 +15,8 @@ export default class Form extends Component {
     qq: '',
     validator: validatorQL,
     changeValue: noop,
-    validateField: noop
+    validateField: noop,
+    reset: noop
   };
 
   render() {
@@ -26,7 +27,8 @@ export default class Form extends Component {
       email,
       qq,
       changeValue,
-      validateField
+      validateField,
+      reset
     } = this.props;
 
     return (
@@ -44,34 +46,47 @@ export default class Form extends Component {
               <input
                 type="text"
                 name="username" value={username}
-                //onChange={this._handleChange}
-                //onBlur={this._validateUserName}
                 />
             </FormField>
 
             {/* password */}
              <FormField error={this._getErrorInfo('password')} label={'password:'} required={true}>
-              <input type="password" name="password" value={password} onChange={this._handleChange}/>
+              <input
+                type="password"
+                name="password"
+                value={password}
+              />
              </FormField>
 
              {/* confirm password*/}
              <FormField error={this._getErrorInfo('confirm')} label={' confirm password:'} required={true}>
-              <input type="password" name="confirm" value={confirm} onChange={this._handleChange}/>
+              <input
+                type="password"
+                name="confirm"
+                value={confirm}
+              />
              </FormField>
 
              {/* email */}
              <FormField error={this._getErrorInfo('email')} label={'email:'} required={true}>
-              <input type="email" name="email" value={email} onChange={this._handleChange}/>
+              <input
+                type="email"
+                name="email"
+                />
              </FormField>
 
              {/* qq */}
              <FormField error={this._getErrorInfo('qq')} label={'qq:'} required={true}>
-              <input type="text" name="qq" value={qq} onChange={this._handleChange}/>
+              <input
+                type="text"
+                name="qq"
+                value={qq}
+                />
              </FormField>
 
              <Button>
-              <input type="submit" value="login" onClick={this._handleLogin}/>
-              <input type="button" value="reset" onClick={this._handleReset}/>
+              <input type="submit" value="login"/>
+              <input type="button" value="reset" onClick={(e) => reset()}/>
              </Button>
             </tbody>
           </table>

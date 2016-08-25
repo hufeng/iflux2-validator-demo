@@ -26,4 +26,10 @@ export default class ValidateFieldActor extends Actor {
       return fields.add(field)
     })
   }
+
+
+  @Action('reset')
+  reset(state) {
+    return state.update('fields', (fields) => fields.clear());
+  }
 }

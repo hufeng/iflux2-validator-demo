@@ -25,4 +25,8 @@ export default class AppStore extends Store {
     this.dispatch('validateField', name)
   };
 
+  reset = () => {
+    this.dispatch('reset')
+  };
+
 }
